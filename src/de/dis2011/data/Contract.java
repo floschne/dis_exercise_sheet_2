@@ -6,20 +6,22 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class Contract {
 	
 	private int id = -1;
 	private int contractNumber;
-	private Date startDate;
+	private LocalDate startDate;
 	private String place;
 	
 	public Contract() {
 		
 	}
 	
-	public Contract(int id, int contractNumber, Date startDate, String place) {
+	public Contract(int id, int contractNumber, LocalDate startDate, String place) {
 		this.id = id;
 		this.contractNumber = contractNumber;
 		this.startDate = startDate;
@@ -42,11 +44,11 @@ public class Contract {
 		this.contractNumber = contractNumber;
 	}
 	
-	public Date getStartDate() {
+	public LocalDate getStartDate() {
 		return startDate;
 	}
 	
-	public void setStartDate(Date startDate) {
+	public void setStartDate(LocalDate startDate) {
 		this.startDate = startDate;
 	}
 	
@@ -74,7 +76,7 @@ public class Contract {
 
 				// Setze Anfrageparameter und fC<hre Anfrage aus
 				pstmt.setInt(1, getContractNumber());
-				pstmt.setDate(2, getStartDate());
+				pstmt.setDate(2, Date.valueOf(getStartDate()));
 				pstmt.setString(3, getPlace());
 				pstmt.executeUpdate();
 
@@ -92,7 +94,7 @@ public class Contract {
 				PreparedStatement pstmt = con.prepareStatement(updateSQL);
 				
 				pstmt.setInt(1, getContractNumber());
-				pstmt.setDate(2, getStartDate());
+				pstmt.setDate(2, Date.valueOf(getStartDate()));
 				pstmt.setString(3, getPlace());
 				pstmt.setInt(4, getId());
 				pstmt.executeUpdate();
@@ -116,7 +118,7 @@ public class Contract {
 			ResultSet rs = pstmt.executeQuery();
 			
 			while(rs.next()) {
-				allContracts.add(new Contract(rs.getInt(1), rs.getInt(2), rs.getDate(3), rs.getString(4)));
+				allContracts.add(new Contract(rs.getInt(1), rs.getInt(2), rs.getDate(3).toLocalDate(), rs.getString(4)));
 			}
 		} catch (Exception e) {
 			System.out.println(e.getMessage());

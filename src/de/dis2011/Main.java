@@ -2,11 +2,11 @@ package de.dis2011;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Locale;
-
-import com.ibm.db2.jcc.c.m;
 
 import de.dis2011.data.Contract;
 import de.dis2011.data.Estate;
@@ -38,11 +38,11 @@ public class Main {
 		final int QUIT = 3;
 		
 		//Erzeuge Menü
-		Menu mainMenu = new Menu("Hauptmenü");
+		Menu mainMenu = new Menu("Main Menu");
 		mainMenu.addEntry("Estate Agent Management", MENU_ESTATE_AGENT_MANAGEMENT_LOGIN);
 		mainMenu.addEntry("Estate Agent Login", MENU_ESTATE_AGENTS_LOGIN);
 		mainMenu.addEntry("Contract Management", MENU_CONTRACT_MANAGEMENT);
-		mainMenu.addEntry("Beenden", QUIT);
+		mainMenu.addEntry("Quit", QUIT);
 		
 		//Verarbeite Eingabe
 		while(true) {
@@ -74,11 +74,11 @@ public class Main {
 		final int BACK = 3;
 		
 		//Maklerverwaltungsmenü
-		Menu maklerMenu = new Menu("Makler-Verwaltung");
-		maklerMenu.addEntry("Neuer Makler", NEW_MAKLER);
-		maklerMenu.addEntry("Markler editieren", EDIT_MAKLER);
-		maklerMenu.addEntry("Markler löschen", DELETE_MAKLER);
-		maklerMenu.addEntry("Zurück zum Hauptmenü", BACK);
+		Menu maklerMenu = new Menu("Estate Agent Management Menu");
+		maklerMenu.addEntry("Create Estate Agent", NEW_MAKLER);
+		maklerMenu.addEntry("Edit Estate Agent", EDIT_MAKLER);
+		maklerMenu.addEntry("Delete Estate Agent", DELETE_MAKLER);
+		maklerMenu.addEntry("Back to main menu", BACK);
 		
 		//Verarbeite Eingabe
 		while(true) {
@@ -177,7 +177,7 @@ public class Main {
 		m.setPassword(FormUtil.readString("Password"));
 		m.save();
 		
-		System.out.println("Makler mit der ID "+m.getId()+" wurde erzeugt.");
+		System.out.println("Estate Agent with ID "+m.getId()+" was added successfully.");
 	}
 	
 	public static void editMakler() {
@@ -195,14 +195,14 @@ public class Main {
 		m.setPassword(password == "" ? m.getPassword() : password);
 		m.save();
 		
-		System.out.println("Makler mit der ID "+m.getId()+" wurde editiert.");
+		System.out.println("Estate Agent with ID "+m.getId()+" was edited successfully.");
 	}
 	
 	public static void deleteMakler() {
 		EstateAgent m = EstateAgent.load(FormUtil.readInt("ID"));
 		m.delete();
 		
-		System.out.println("Makler mit der ID "+m.getId()+" wurde gelöscht.");
+		System.out.println("Estate Agent with ID "+m.getId()+" was deleted successfully.");
 	}
 	
 	public static void estateAgentManagementLogin() {
@@ -288,17 +288,12 @@ public class Main {
 				
 		m.setContractNumber(FormUtil.readInt("Contract Number"));
 		m.setPlace(FormUtil.readString("Place"));
-		
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat("dd-MM-yyyy", Locale.ENGLISH);
-		Date date;
-		
-		try {
-			date = simpleDateFormat.parse(FormUtil.readString("Start Date (mm-dd-yyy)"));
-			java.sql.Date sqlDate = new java.sql.Date(date.getTime());
-			m.setStartDate(sqlDate);
-		} catch (ParseException e) {
-			e.printStackTrace();
-		}
+
+		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MMM-dd");
+		dtf = dtf.withLocale(Locale.ENGLISH);
+		final LocalDate dt = LocalDate.parse(FormUtil.readString("Start Date (yyy-MMM-dd)"), dtf);
+
+		m.setStartDate(dt);
 
 		m.save();
 		
@@ -311,8 +306,10 @@ public class Main {
 		System.out.println("Contract Overview \n");
 		
 		allContracts.forEach((contract) -> {
+			DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MMM-dd");
+			dtf = dtf.withLocale(Locale.ENGLISH);
 			System.out.println(contract.getId() + " " + contract.getContractNumber()
-			+ " " + contract.getStartDate().toGMTString() + " " + contract.getPlace());
+			+ " " + contract.getStartDate().format(dtf) + " " + contract.getPlace());
 		});
 	}
 }
